@@ -130,11 +130,11 @@ namespace SpaceMayhem
 		public override void Death ()
 		{
 			isDead = true;
-			gameObject.SetActive(false);
 			GameManager.GetSingleton<Level>().scoreText.text = "Score: " + (int) score;
 			explosion = GameManager.GetSingleton<ObjectPool>().SpawnComponent<Explosion>(explosionPrefab, trs.position);
 			Destroy(explosion.gameObject, explosion.anim.clip.length);
 			StartCoroutine (DeathRoutine ());
+			gameObject.SetActive(false);
 		}
 
 		IEnumerator DeathRoutine ()

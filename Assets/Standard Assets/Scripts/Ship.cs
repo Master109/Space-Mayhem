@@ -32,9 +32,7 @@ namespace SpaceMayhem
 		
 		public virtual void DoUpdate ()
 		{
-			if (GameManager.GetSingleton<Player>() == null)
-				return;
-			toPlayer = GameManager.GetSingleton<Player>().trs.position - trs.position;
+			toPlayer = Player.instance.trs.position - trs.position;
 			if (canShoot)
 			{
 				foreach (Weapon weapon in weapons)

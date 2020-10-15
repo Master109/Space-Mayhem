@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 using System;
 using Extensions;
 using Object = UnityEngine.Object;
