@@ -8,7 +8,7 @@ using TMPro;
 using UnityEditor;
 #endif
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	//[ExecuteInEditMode]
 	[RequireComponent(typeof(TMP_Text))]

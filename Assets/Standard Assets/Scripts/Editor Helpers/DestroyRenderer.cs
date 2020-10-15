@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class DestroyRenderer : MonoBehaviour
 	{

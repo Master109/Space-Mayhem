@@ -1,6 +1,6 @@
 #if UNITY_EDITOR
 using UnityEngine;
-using SpaceshipGame;
+using SpaceMayhem;
 
 public class SetRandomUniqueIds : EditorScript
 {

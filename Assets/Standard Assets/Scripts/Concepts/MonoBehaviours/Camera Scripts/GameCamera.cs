@@ -1,6 +1,6 @@
 using Extensions;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class GameCamera : CameraScript
 	{

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class Enemy : Ship
 	{

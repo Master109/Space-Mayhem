@@ -5,7 +5,7 @@ using System;
 using Extensions;
 using Object = UnityEngine.Object;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
 	{

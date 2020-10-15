@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class AudioManager : MonoBehaviour, ISaveableAndLoadable
 	{

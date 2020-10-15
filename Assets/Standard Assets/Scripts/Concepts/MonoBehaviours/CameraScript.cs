@@ -6,7 +6,7 @@ using Extensions;
 using UnityEditor;
 #endif
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	//[ExecuteInEditMode]
 	[RequireComponent(typeof(Camera))]

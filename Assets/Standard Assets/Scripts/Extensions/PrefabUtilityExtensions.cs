@@ -5,7 +5,7 @@ using UnityEngine;
 using Extensions;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using SpaceshipGame;
+using SpaceMayhem;
 
 namespace Extensions
 {

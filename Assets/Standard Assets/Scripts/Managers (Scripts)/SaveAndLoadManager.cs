@@ -2,14 +2,13 @@
 using UnityEngine;
 using System.Reflection;
 using Extensions;
+using Utf8Json;
 using System;
 using Random = UnityEngine.Random;
 using System.IO;
-// using ZeroFormatter;
-// using OdinSerializer;
-using FullSerializer;
+using System.Collections;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	//[ExecuteInEditMode]
 	public class SaveAndLoadManager : SingletonMonoBehaviour<SaveAndLoadManager>
@@ -18,20 +17,21 @@ namespace SpaceshipGame
 		public List<SaveAndLoadObject> saveAndLoadObjects = new List<SaveAndLoadObject>();
 		public static SaveEntry[] saveEntries = new SaveEntry[0];
 		// public static Dictionary<string, SaveAndLoadObject> saveAndLoadObjectTypeDict = new Dictionary<string, SaveAndLoadObject>();
-		public TemporaryActiveText displayOnSave;
-		public int pastSaveEntryPreserveCount;
+		// public TemporaryActiveText displayOnSave;
+		public int keepPastSavesCount;
 		public bool usePlayerPrefs;
 		[Multiline]
 		public string savedData;
-		public const int INIT_LAST_UNIQUE_ID = 3;
-		public static int lastUniqueId = INIT_LAST_UNIQUE_ID;
-		private static readonly fsSerializer _serializer = new fsSerializer();
-
+		public bool overwriteSaves;
+		
 #if UNITY_EDITOR
 		public virtual void OnEnable ()
 		{
 			if (Application.isPlaying)
+			{
+				// displayOnSave.go.SetActive(false);
 				return;
+			}
 			saveAndLoadObjects.Clear();
 			saveAndLoadObjects.AddRange(FindObjectsOfType<SaveAndLoadObject>());
 			foreach (SaveAndLoadObject saveAndLoadObject in saveAndLoadObjects)
@@ -56,7 +56,7 @@ namespace SpaceshipGame
 			if (!usePlayerPrefs)
 				print(Application.persistentDataPath);
 #endif
-			// Setup ();
+			Setup ();
 		}
 
 		public virtual void Setup ()
@@ -75,17 +75,46 @@ namespace SpaceshipGame
 			saveEntries = _saveEntries.ToArray();
 		}
 		
-		public virtual void Save ()
+		public virtual void SaveToCurrentAccount ()
 		{
 			if (GameManager.GetSingleton<SaveAndLoadManager>() != this)
 			{
-				GameManager.GetSingleton<SaveAndLoadManager>().Save ();
+				GameManager.GetSingleton<SaveAndLoadManager>().SaveToCurrentAccount ();
 				return;
 			}
+			Save (ArchivesManager.currentAccountIndex);
+		}
+		
+		public virtual void Save (int accountIndex)
+		{
+			if (GameManager.GetSingleton<SaveAndLoadManager>() != this)
+			{
+				GameManager.GetSingleton<SaveAndLoadManager>().SaveToCurrentAccount ();
+				return;
+			}
+			if (accountIndex != -1)
+			{
+				if (overwriteSaves)
+					Save (accountIndex, ArchivesManager.Accounts[ArchivesManager.currentAccountIndex].MostRecentlyUsedSaveIndex + 1);
+				else
+					Save (accountIndex, ArchivesManager.Accounts[ArchivesManager.currentAccountIndex].LastSaveIndex + 1);
+			}
+			else
+				Save (-1, -1);
+		}
+		
+		public virtual void Save (int accountIndex, int saveIndex)
+		{
+			if (GameManager.GetSingleton<SaveAndLoadManager>() != this)
+			{
+				GameManager.GetSingleton<SaveAndLoadManager>().SaveToCurrentAccount ();
+				return;
+			}
+			OnAboutToSave ();
 			// Setup ();
+			savedData = "";
 			if (!usePlayerPrefs)
 			{
-				savedData = "";
 				if (!File.Exists(Application.persistentDataPath + Path.DirectorySeparatorChar + "Saved Data.txt"))
 					File.CreateText(Application.persistentDataPath + Path.DirectorySeparatorChar + "Saved Data.txt");
 				else
@@ -95,22 +124,23 @@ namespace SpaceshipGame
 					for (int i = 0; i < valueGroups.Length; i += 2)
 					{
 						string valueGroup = valueGroups[i];
-						if (valueGroup.StartsWith("" + AccountManager.lastUsedAccountIndex))
+						if (valueGroup.StartsWith("" + accountIndex))
 							savedData = savedData.RemoveEach(valueGroup + SaveEntry.VALUE_GROUP_SEPERATOR + valueGroups[i + 1] + SaveEntry.VALUE_GROUP_SEPERATOR);
 					}
 				}
 			}
-			if (AccountManager.lastUsedAccountIndex != -1)
+			if (accountIndex != -1)
 			{
-				AccountManager.CurrentlyPlaying.MostRecentlyUsedSaveEntryIndex ++;
-				if (AccountManager.CurrentlyPlaying.MostRecentlyUsedSaveEntryIndex > AccountManager.CurrentlyPlaying.LastSaveEntryIndex)
-					AccountManager.CurrentlyPlaying.LastSaveEntryIndex ++;
+				Account account = ArchivesManager.Accounts[accountIndex];
+				account.MostRecentlyUsedSaveIndex = saveIndex;
+				if (account.MostRecentlyUsedSaveIndex > ArchivesManager.CurrentlyPlaying.LastSaveIndex)
+					account.LastSaveIndex ++;
 				for (int i = 0; i < saveEntries.Length; i ++)
 				{
 					SaveEntry saveEntry = saveEntries[i];
-					if (AccountManager.CurrentlyPlaying.MostRecentlyUsedSaveEntryIndex > pastSaveEntryPreserveCount)
-						saveEntry.Delete (AccountManager.lastUsedAccountIndex, AccountManager.CurrentlyPlaying.MostRecentlyUsedSaveEntryIndex - pastSaveEntryPreserveCount - 1);
-					saveEntry.Save (AccountManager.lastUsedAccountIndex, AccountManager.CurrentlyPlaying.MostRecentlyUsedSaveEntryIndex);
+					if (ArchivesManager.CurrentlyPlaying.MostRecentlyUsedSaveIndex > keepPastSavesCount)
+						saveEntry.Delete (accountIndex, ArchivesManager.CurrentlyPlaying.LastSaveIndex - keepPastSavesCount - 1);
+					saveEntry.Save (accountIndex, saveIndex);
 				}
 			}
 			else
@@ -120,15 +150,37 @@ namespace SpaceshipGame
 			}
 			if (!usePlayerPrefs)
 				File.WriteAllText(Application.persistentDataPath + Path.DirectorySeparatorChar + "Saved Data.txt", savedData);
-			if (displayOnSave.go != null)
-				displayOnSave.Do ();
+			// displayOnSave.Do ();
+		}
+
+		void OnAboutToSave ()
+		{
+			// Player.instance.AddMoney (Player.addToMoneyOnSave);
+			// Player.addToMoneyOnSave = 0;
+			// Player.instance.DisplayMoney ();
+			// for (int i = 0; i < Collectible.instances.Length; i ++)
+			// {
+			//     Collectible collectible = Collectible.instances[i];
+			//     if (collectible.collected)
+			// 		collectible.collectedAndSaved = true;
+			// }
 		}
 		
-		public virtual void Load (int saveEntryIndex)
+		public virtual void LoadFromCurrentAccount ()
 		{
 			if (GameManager.GetSingleton<SaveAndLoadManager>() != this)
 			{
-				GameManager.GetSingleton<SaveAndLoadManager>().Load (saveEntryIndex);
+				GameManager.GetSingleton<SaveAndLoadManager>().LoadFromCurrentAccount ();
+				return;
+			}
+			Load (ArchivesManager.currentAccountIndex);
+		}
+		
+		public virtual void Load (int accountIndex)
+		{
+			if (GameManager.GetSingleton<SaveAndLoadManager>() != this)
+			{
+				GameManager.GetSingleton<SaveAndLoadManager>().Load (accountIndex);
 				return;
 			}
 			if (!usePlayerPrefs)
@@ -138,106 +190,127 @@ namespace SpaceshipGame
 				else
 					File.CreateText(Application.persistentDataPath + Path.DirectorySeparatorChar + "Saved Data.txt");
 			}
+			StartCoroutine(LoadRoutine (accountIndex));
+		}
+
+		IEnumerator LoadRoutine (int accountIndex)
+		{
+			if (accountIndex != -1)
+				yield return StartCoroutine(LoadRoutine (accountIndex, ArchivesManager.CurrentlyPlaying.MostRecentlyUsedSaveIndex));
+			else
+				yield return StartCoroutine(LoadRoutine (-1, -1));
+
+		}
+
+		IEnumerator LoadRoutine (int accountIndex, int saveIndex)
+		{
+			yield return new WaitForEndOfFrame();
 			Setup ();
-			if (AccountManager.lastUsedAccountIndex != -1)
-				AccountManager.CurrentlyPlaying.MostRecentlyUsedSaveEntryIndex = saveEntryIndex;
 			for (int i = 0; i < saveEntries.Length; i ++)
-				saveEntries[i].Load (AccountManager.lastUsedAccountIndex, saveEntryIndex);
+				saveEntries[i].Load (accountIndex, saveIndex);
 			OnLoaded ();
 		}
 
 		public virtual void OnLoaded ()
 		{
-			GameManager.GetSingleton<GameManager>().SetGosActive ();
-			GameManager.GetSingleton<AudioManager>().Awake ();
-			// GameManager.GetSingleton<Player>().trs.position = GameManager.GetSingleton<Player>().SpawnPosition;
+			// Player.instance.trs.position = Player.instance.spawnPosition;
 			// GameManager.GetSingleton<GameCamera>().Awake ();
 			// GameManager.GetSingleton<World>().Init ();
-			// GameManager.GetSingleton<WorldMap>().Init ();
+			GameManager.GetSingleton<AudioManager>().Awake ();
 			// AccountSelectMenu.Init ();
-			// foreach (Collectible collectible in Collectible.instances)
+			// for (int i = 0; i < Collectible.instances.Length; i ++)
 			// {
-			// 	if (collectible.collected)
+			//     Collectible collectible = Collectible.instances[i];
+			// 	if (collectible.collectedAndSaved)
 			// 		collectible.OnCollected ();
 			// }
 			// Obelisk.instances = FindObjectsOfType<Obelisk>();
-			// foreach (Obelisk obelisk in Obelisk.instances)
+			// for (int i = 0; i < Obelisk.instances.Length; i ++)
 			// {
-			// 	if (obelisk.found)
+			//     Obelisk obelisk = Obelisk.instances[i];
+			//     if (obelisk.found)
 			// 		obelisk.foundIndicator.SetActive(true);
 			// }
 			// Perk.instances = FindObjectsOfType<Perk>();
-			// foreach (Perk perk in Perk.instances)
-			// 	perk.Init ();
-			// if (AccountManager.lastUsedAccountIndex != -1)
-			// 	GameManager.GetSingleton<Player>().AddMoney (0);
+			// for (int i = 0; i < Perk.instances.Length; i++)
+			// {
+			//     Perk perk = Perk.instances[i];
+			//     perk.Init ();
+			// }
+			// if (ArchivesManager.currentAccountIndex != -1)
+			// 	Player.instance.DisplayMoney ();
+			GameManager.GetSingleton<GameManager>().SetGosActive ();
+			// GameManager.GetSingleton<WorldMap>().Init ();
+			// if (GameManager.GetSingleton<GameManager>().movementJumpingShootingTutorialConversation.gameObject.activeSelf)
+			// 	GameManager.GetSingleton<DialogManager>().StartConversation (GameManager.GetSingleton<GameManager>().movementJumpingShootingTutorialConversation);
 		}
 
-		public virtual void Delete (int saveEntryIndex)
+		public virtual void DeleteCurrentAccount ()
 		{
 			if (GameManager.GetSingleton<SaveAndLoadManager>() != this)
 			{
-				GameManager.GetSingleton<SaveAndLoadManager>().Delete (saveEntryIndex);
+				GameManager.GetSingleton<SaveAndLoadManager>().DeleteCurrentAccount ();
+				return;
+			}
+			Delete (ArchivesManager.currentAccountIndex);
+		}
+
+		public virtual void Delete (int accountIndex)
+		{
+			if (GameManager.GetSingleton<SaveAndLoadManager>() != this)
+			{
+				GameManager.GetSingleton<SaveAndLoadManager>().Delete (accountIndex);
+				return;
+			}
+			if (accountIndex != -1)
+			{
+				Account account = ArchivesManager.Accounts[accountIndex];
+				for (int saveIndex = account.LastSaveIndex - keepPastSavesCount; saveIndex <= account.LastSaveIndex; saveIndex ++)
+					Delete (accountIndex, saveIndex);
+			}
+			else
+				Delete (-1, -1);
+		}
+
+		public virtual void Delete (int accountIndex, int saveIndex)
+		{
+			if (GameManager.GetSingleton<SaveAndLoadManager>() != this)
+			{
+				GameManager.GetSingleton<SaveAndLoadManager>().Delete (accountIndex, saveIndex);
 				return;
 			}
 			for (int i = 0; i < saveEntries.Length; i ++)
-				saveEntries[i].Delete (AccountManager.lastUsedAccountIndex, saveEntryIndex);
-			Save ();
+				saveEntries[i].Delete (accountIndex, saveIndex);
+			if (accountIndex != -1 && ArchivesManager.currentAccountIndex == accountIndex && saveIndex == ArchivesManager.CurrentlyPlaying.MostRecentlyUsedSaveIndex)
+				ResetPersistantValues ();
+			// Save (accountIndex, saveIndex);
 		}
 
 		public static void ResetPersistantValues ()
 		{
 			GameManager.enabledGosString = "";
 			GameManager.disabledGosString = "";
+			// WorldMap.exploredCellPositions.Clear();
+			// WorldMap.exploredCellPositionsAtLastTimeOpened.Clear();
+			// Player.addToMoneyOnSave = 0;
+			ArchivesManager.currentAccountIndex = -1;
 		}
 
 		public virtual void DeleteAll ()
 		{
 			PlayerPrefs.DeleteAll();
-			if (!usePlayerPrefs)
-			{
-				for (int i = -1; i < AccountManager.Accounts.Length; i ++)
-					Delete (i);
-			}
-			ResetPersistantValues ();
-		}
-		
-		public virtual void LoadMostRecent ()
-		{
-			if (AccountManager.lastUsedAccountIndex != -1)
-				Load (AccountManager.CurrentlyPlaying.MostRecentlyUsedSaveEntryIndex);
-			else
-				Load (-1);
+			for (int accountIndex = -1; accountIndex < ArchivesManager.Accounts.Length; accountIndex ++)
+				Delete (accountIndex);
 		}
 
 		public static string Serialize (object value, Type type)
 		{
-			fsData data;
-			_serializer.TrySerialize(type, value, out data).AssertSuccessWithoutWarnings();
-			return fsJsonPrinter.CompressedJson(data);
-			// byte[] bytes = ZeroFormatter.ZeroFormatterSerializer.NonGeneric.Serialize(type, value);
-			// byte[] bytes = SerializationUtility.SerializeValue(value, DataFormat.Binary);
-			// string output = "";
-			// foreach (byte b in bytes)
-			// 	output += "," + b;
-			// return output;
+			return JsonSerializer.NonGeneric.ToJsonString(type, value);
 		}
 
 		public static object Deserialize (string serializedState, Type type)
 		{
-			fsData data = fsJsonParser.Parse(serializedState);
-			object deserialized = null;
-			_serializer.TryDeserialize(data, type, ref deserialized).AssertSuccessWithoutWarnings();
-			return deserialized;
-			// string[] strings = serializedState.Split(new string[1] { "," }, StringSplitOptions.RemoveEmptyEntries);
-			// byte[] bytes = new byte[strings.Length];
-			// for (int i = 0; i < strings.Length; i ++)
-			// {
-			// 	string str = strings[i];
-			// 	bytes[i] = byte.Parse(str);
-			// }
-			// return ZeroFormatter.ZeroFormatterSerializer.NonGeneric.Deserialize(type, bytes);
-			// return SerializationUtility.DeserializeValue<object>(bytes, DataFormat.Binary);
+			return JsonSerializer.NonGeneric.Deserialize(type, serializedState);
 		}
 		
 		public class SaveEntry
@@ -251,7 +324,7 @@ namespace SpaceshipGame
 			{
 			}
 			
-			public virtual void Save (int accountIndex, int saveEntryIndex)
+			public virtual void Save (int accountIndex, int saveIndex)
 			{
 				foreach (MemberEntry memberEntry in memberEntries)
 				{
@@ -259,22 +332,30 @@ namespace SpaceshipGame
 					{
 						PropertyInfo property = memberEntry.member as PropertyInfo;
 						if (GameManager.GetSingleton<SaveAndLoadManager>().usePlayerPrefs)
-							PlayerPrefs.SetString(GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry), Serialize(property.GetValue(saveableAndLoadable, null), property.PropertyType));
+						{
+							string data = Serialize(property.GetValue(saveableAndLoadable), property.PropertyType);
+							PlayerPrefs.SetString(GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry), data);
+							GameManager.GetSingleton<SaveAndLoadManager>().savedData += data;
+						}
 						else
-							GameManager.GetSingleton<SaveAndLoadManager>().savedData += GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry) + VALUE_GROUP_SEPERATOR + Serialize(property.GetValue(saveableAndLoadable, null), property.PropertyType) + VALUE_GROUP_SEPERATOR;
+							GameManager.GetSingleton<SaveAndLoadManager>().savedData += GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry) + VALUE_GROUP_SEPERATOR + Serialize(property.GetValue(saveableAndLoadable), property.PropertyType) + VALUE_GROUP_SEPERATOR;
 					}
 					else
 					{
 						FieldInfo field = memberEntry.member as FieldInfo;
 						if (GameManager.GetSingleton<SaveAndLoadManager>().usePlayerPrefs)
-							PlayerPrefs.SetString(GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry), Serialize(field.GetValue(saveableAndLoadable), field.FieldType));
+						{
+							string data = Serialize(field.GetValue(saveableAndLoadable), field.FieldType);
+							PlayerPrefs.SetString(GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry), data);
+							GameManager.GetSingleton<SaveAndLoadManager>().savedData += data;
+						}
 						else
-							GameManager.GetSingleton<SaveAndLoadManager>().savedData += GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry) + VALUE_GROUP_SEPERATOR + Serialize(field.GetValue(saveableAndLoadable), field.FieldType) + VALUE_GROUP_SEPERATOR;
+							GameManager.GetSingleton<SaveAndLoadManager>().savedData += GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry) + VALUE_GROUP_SEPERATOR + Serialize(field.GetValue(saveableAndLoadable), field.FieldType) + VALUE_GROUP_SEPERATOR;
 					}
 				}
 			}
 			
-			public virtual void Load (int accountIndex, int saveEntryIndex)
+			public virtual void Load (int accountIndex, int saveIndex)
 			{
 				object value;
 				foreach (MemberEntry memberEntry in memberEntries)
@@ -284,8 +365,8 @@ namespace SpaceshipGame
 						PropertyInfo property = memberEntry.member as PropertyInfo;
 						if (GameManager.GetSingleton<SaveAndLoadManager>().usePlayerPrefs)
 						{
-							value = Deserialize(PlayerPrefs.GetString(GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry), Serialize(property.GetValue(saveableAndLoadable, null), property.PropertyType)), property.PropertyType);
-							property.SetValue(saveableAndLoadable, value, null);
+							value = Deserialize(PlayerPrefs.GetString(GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry), Serialize(property.GetValue(saveableAndLoadable), property.PropertyType)), property.PropertyType);
+							property.SetValue(saveableAndLoadable, value);
 						}
 						else
 						{
@@ -293,11 +374,11 @@ namespace SpaceshipGame
 							for (int i = 0; i < valueGroups.Length; i += 2)
 							{
 								string valueGroup = valueGroups[i];
-								if (valueGroup == GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry))
+								if (valueGroup == GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry))
 								{
 									valueGroup = valueGroups[i + 1];
 									value = Deserialize(valueGroup, property.PropertyType);
-									property.SetValue(saveableAndLoadable, value, null);
+									property.SetValue(saveableAndLoadable, value);
 								}
 							}
 						}
@@ -307,7 +388,7 @@ namespace SpaceshipGame
 						FieldInfo field = memberEntry.member as FieldInfo;
 						if (GameManager.GetSingleton<SaveAndLoadManager>().usePlayerPrefs)
 						{
-							value = Deserialize(PlayerPrefs.GetString(GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry), Serialize(field.GetValue(saveableAndLoadable), field.FieldType)), field.FieldType);
+							value = Deserialize(PlayerPrefs.GetString(GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry), Serialize(field.GetValue(saveableAndLoadable), field.FieldType)), field.FieldType);
 							field.SetValue(saveableAndLoadable, value);
 						}
 						else
@@ -316,7 +397,7 @@ namespace SpaceshipGame
 							for (int i = 0; i < valueGroups.Length; i += 2)
 							{
 								string valueGroup = valueGroups[i];
-								if (valueGroup == GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry))
+								if (valueGroup == GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry))
 								{
 									valueGroup = valueGroups[i + 1];
 									value = Deserialize(valueGroup, field.FieldType);
@@ -328,31 +409,31 @@ namespace SpaceshipGame
 				}
 			}
 
-			public virtual void Delete (int accountIndex, int saveEntryIndex)
+			public virtual void Delete (int accountIndex, int saveIndex)
 			{
 				foreach (MemberEntry memberEntry in memberEntries)
 				{
 					if (GameManager.GetSingleton<SaveAndLoadManager>().usePlayerPrefs)
-						PlayerPrefs.DeleteKey(GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry));
+						PlayerPrefs.DeleteKey(GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry));
 					else
 					{
 						string[] valueGroups = GameManager.GetSingleton<SaveAndLoadManager>().savedData.Split(new string[] { VALUE_GROUP_SEPERATOR }, StringSplitOptions.None);
 						for (int i = 0; i < valueGroups.Length; i += 2)
 						{
 							string valueGroup = valueGroups[i];
-							if (valueGroup == GetKeyNameForMemberEntry(accountIndex, saveEntryIndex, memberEntry))
+							if (valueGroup == GetKeyNameForMemberEntry(accountIndex, saveIndex, memberEntry))
 								GameManager.GetSingleton<SaveAndLoadManager>().savedData = GameManager.GetSingleton<SaveAndLoadManager>().savedData.RemoveEach(valueGroup + VALUE_GROUP_SEPERATOR + valueGroups[i + 1] + VALUE_GROUP_SEPERATOR);
 						}
 					}
 				}
 			}
 
-			public virtual string GetKeyNameForMemberEntry (int accountIndex, int saveEntryIndex, MemberEntry memberEntry)
+			public virtual string GetKeyNameForMemberEntry (int accountIndex, int saveIndex, MemberEntry memberEntry)
 			{
 				// if (memberEntry.isShared)
 				// 	return VALUE_SEPERATOR + saveableAndLoadable.UniqueId + VALUE_SEPERATOR + memberEntry.member.Name;
 				// else
-					return accountIndex + VALUE_SEPERATOR + saveEntryIndex + VALUE_SEPERATOR + saveableAndLoadable.UniqueId + VALUE_SEPERATOR + memberEntry.member.Name;
+					return accountIndex + VALUE_SEPERATOR + saveIndex + VALUE_SEPERATOR + saveableAndLoadable.UniqueId + VALUE_SEPERATOR + memberEntry.member.Name;
 			}
 
 			public class MemberEntry

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Extensions;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class Team : MonoBehaviour
 	{

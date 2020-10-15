@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class LevelMap : MonoBehaviour
 	{

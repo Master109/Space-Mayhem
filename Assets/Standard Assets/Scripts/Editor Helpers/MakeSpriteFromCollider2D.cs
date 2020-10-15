@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System;
 using Extensions;
 using UnityEditor;
-using SpaceshipGame;
+using SpaceMayhem;
 using System.IO;
 
 [RequireComponent(typeof(SpriteRenderer))]

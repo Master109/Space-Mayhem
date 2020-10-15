@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 using Extensions;
-using SpaceshipGame;
+using SpaceMayhem;
 
 [Serializable]
 public class Circle2D

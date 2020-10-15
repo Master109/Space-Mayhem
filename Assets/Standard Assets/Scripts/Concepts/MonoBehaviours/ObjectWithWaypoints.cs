@@ -7,7 +7,7 @@ using Extensions;
 using UnityEditor;
 #endif
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	[ExecuteInEditMode]
 	public class ObjectWithWaypoints : MonoBehaviour, ICopyable

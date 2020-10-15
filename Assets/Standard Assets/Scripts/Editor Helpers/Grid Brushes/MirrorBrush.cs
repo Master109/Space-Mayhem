@@ -7,7 +7,7 @@ using UnityEngine.Tilemaps;
 using Extensions;
 using UnityEditor;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	[CustomGridBrush(false, false, false, "Mirror Brush")]
 	public class MirrorBrush : GridBrush

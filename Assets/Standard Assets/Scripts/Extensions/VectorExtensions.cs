@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using SpaceshipGame;
+using SpaceMayhem;
 using UnityEngine.InputSystem.Controls;
 
 namespace Extensions

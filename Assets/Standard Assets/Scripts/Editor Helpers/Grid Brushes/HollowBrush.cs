@@ -7,7 +7,7 @@ using UnityEngine.Tilemaps;
 using Extensions;
 using UnityEditor;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	[CustomGridBrush(false, false, false, "Hollow Brush")]
 	public class HollowBrush : GridBrush

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using SpaceshipGame;
+using SpaceMayhem;
 
 [RequireComponent(typeof(Canvas))]
 public class _Canvas : MonoBehaviour

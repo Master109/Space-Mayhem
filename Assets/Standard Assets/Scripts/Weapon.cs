@@ -3,7 +3,7 @@ using System.Collections;
 using Extensions;
 using UnityEngine.Serialization;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class Weapon : MonoBehaviour, IUpdatable
 	{

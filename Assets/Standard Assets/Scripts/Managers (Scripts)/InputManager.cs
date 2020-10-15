@@ -2,7 +2,7 @@
 using Extensions;
 using UnityEngine.InputSystem;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class InputManager : MonoBehaviour
 	{

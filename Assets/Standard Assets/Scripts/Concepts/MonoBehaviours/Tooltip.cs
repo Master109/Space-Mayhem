@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Extensions;
-using SpaceshipGame;
+using SpaceMayhem;
 using UnityEngine.UI;
 using TMPro;
 

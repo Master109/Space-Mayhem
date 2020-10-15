@@ -4,7 +4,7 @@ using System;
 using UnityEngine.UI;
 using TMPro;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	[Serializable]
 	public class TemporaryActiveText : TemporaryActiveGameObject

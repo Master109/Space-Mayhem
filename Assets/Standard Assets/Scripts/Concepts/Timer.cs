@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using SpaceshipGame;
+using SpaceMayhem;
 using Extensions;
 
 [Serializable]

@@ -4,7 +4,7 @@ using UnityEngine;
 using Extensions;
 using System;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	[RequireComponent(typeof(AudioSource))]
 	public class SoundEffect : Spawnable

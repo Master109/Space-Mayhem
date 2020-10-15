@@ -4,7 +4,7 @@ using Extensions;
 using System.Collections.Generic;
 using TMPro;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class Level : MonoBehaviour
 	{

@@ -3,7 +3,7 @@ using System.Collections;
 using System;
 using Extensions;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	[Serializable]
 	public class TemporaryActiveGameObject

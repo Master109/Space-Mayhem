@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using Extensions;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	[ExecuteInEditMode]
 	public class DraggableWindow : MonoBehaviour, IUpdatable

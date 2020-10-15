@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using SpaceshipGame;
+using SpaceMayhem;
 using UnityEditor;
 
 namespace Extensions

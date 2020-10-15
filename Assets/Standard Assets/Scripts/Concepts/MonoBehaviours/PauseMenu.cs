@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class PauseMenu : SingletonMonoBehaviour<PauseMenu>
 	{

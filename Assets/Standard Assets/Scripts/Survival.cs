@@ -3,7 +3,7 @@ using System.Collections;
 using Extensions;
 using UnityEngine.SceneManagement;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class Survival : Level, IUpdatable
 	{

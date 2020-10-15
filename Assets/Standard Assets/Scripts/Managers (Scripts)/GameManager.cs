@@ -14,7 +14,7 @@ using UnityEngine.UI;
 using UnityEngine.Tilemaps;
 using TMPro;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	//[ExecuteInEditMode]
 	public class GameManager : SingletonMonoBehaviour<GameManager>, ISaveableAndLoadable
@@ -178,7 +178,7 @@ namespace SpaceshipGame
 			singletons.Remove(GetType());
 			singletons.Add(GetType(), this);
 			// InitCursor ();
-			AccountManager.lastUsedAccountIndex = 0;
+			ArchivesManager.currentAccountIndex = 0;
 			// if (SceneManager.GetActiveScene().name == "Init")
 			// 	LoadGameScenes ();
 			// else if (GetSingleton<GameCamera>() != null)
@@ -211,7 +211,7 @@ namespace SpaceshipGame
 			if (screenEffectAnimator != null)
 				screenEffectAnimator.Play("None");
 			// GetSingleton<PauseMenu>().Hide ();
-			if (AccountManager.lastUsedAccountIndex != -1)
+			if (ArchivesManager.currentAccountIndex != -1)
 			{
 				// GetSingleton<AccountSelectMenu>().gameObject.SetActive(false);
 				PauseGame (false);
@@ -281,7 +281,7 @@ namespace SpaceshipGame
 				GetSingleton<SaveAndLoadManager>().OnLoaded ();
 			}
 			else
-				GetSingleton<SaveAndLoadManager>().LoadMostRecent ();
+				GetSingleton<SaveAndLoadManager>().LoadFromCurrentAccount ();
 			// GetSingleton<AdsManager>().ShowAd ();
 			Init ();
 			yield break;
@@ -377,9 +377,9 @@ namespace SpaceshipGame
 		public virtual void OnApplicationQuit ()
 		{
 			PauseGame (true);
-			if (AccountManager.lastUsedAccountIndex == -1)
+			if (ArchivesManager.currentAccountIndex == -1)
 				return;
-			AccountManager.CurrentlyPlaying.PlayTime += Time.time;
+			ArchivesManager.CurrentlyPlaying.PlayTime += Time.time;
 			// GetSingleton<SaveAndLoadManager>().Save ();
 		}
 
@@ -568,39 +568,30 @@ namespace SpaceshipGame
 
 		public static T GetSingleton<T> ()
 		{
-			if (!singletons.ContainsKey(typeof(T)))
-				return GetSingleton<T>(FindObjectsOfType<Object>());
-			else
-			{
-				if (singletons[typeof(T)] == null || singletons[typeof(T)].Equals(default(T)))
-				{
-					T singleton = GetSingleton<T>(FindObjectsOfType<Object>());
-					singletons[typeof(T)] = singleton;
-					return singleton;
-				}
-				else
-					return (T) singletons[typeof(T)];
-			}
+			object obj = default(T);
+			if (!singletons.TryGetValue(typeof(T), out obj))
+				obj = GetSingleton<T>(FindObjectsOfType<Object>());
+			return (T) obj;
 		}
 
 		public static T GetSingleton<T> (Object[] objects)
 		{
 			if (typeof(T).IsSubclassOf(typeof(Object)))
 			{
-				foreach (Object obj in objects)
+				for (int i = 0; i < objects.Length; i ++)
 				{
+					Object obj = objects[i];
 					if (obj is T)
 					{
-						singletons.Remove(typeof(T));
-						singletons.Add(typeof(T), obj);
-						break;
+						if (singletons.ContainsKey(typeof(T)))
+							singletons[typeof(T)] = obj;
+						else
+							singletons.Add(typeof(T), obj);
+						return (T) (object) obj;
 					}
 				}
 			}
-			if (singletons.ContainsKey(typeof(T)))
-				return (T) singletons[typeof(T)];
-			else
-				return default(T);
+			return default(T);
 		}
 
 		// public static T GetSingletonIncludeAssets<T> ()

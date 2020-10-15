@@ -2,7 +2,7 @@
 using System.Collections;
 using Extensions;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class MakeAsteroids : MonoBehaviour
 	{

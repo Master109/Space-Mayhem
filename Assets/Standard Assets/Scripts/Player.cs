@@ -3,11 +3,12 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using Extensions;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	[DisallowMultipleComponent]
 	public class Player : Ship
 	{
+		public static Player instance;
 		public static float score;
 		public const int INIT_GOLD = 1000;
 		public static int gold = INIT_GOLD;
@@ -21,6 +22,7 @@ namespace SpaceshipGame
 
 		public override void Awake ()
 		{
+			instance = this;
 			base.Awake ();
 			DontDestroyOnLoad (gameObject);
 		}

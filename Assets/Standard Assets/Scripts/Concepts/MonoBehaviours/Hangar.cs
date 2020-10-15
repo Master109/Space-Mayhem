@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Extensions;
 using TMPro;
 
-namespace SpaceshipGame
+namespace SpaceMayhem
 {
 	public class Hangar : MonoBehaviour, IUpdatable
 	{

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Reflection;
 using System;
-using SaveEntry = SpaceshipGame.SaveAndLoadManager.SaveEntry;
+using SaveEntry = SpaceMayhem.SaveAndLoadManager.SaveEntry;
 using Extensions;
 
 public class SaveAndLoadObject : MonoBehaviour
