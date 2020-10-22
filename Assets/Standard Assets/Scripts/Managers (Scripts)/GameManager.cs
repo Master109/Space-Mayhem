@@ -134,14 +134,13 @@ namespace SpaceMayhem
 		public Timer hideCursorTimer;
 		public GameScene[] gameScenes;
 		public Canvas[] canvases = new Canvas[0];
-		public GameObject emptyGoPrefab;
 		public TemporaryActiveText notificationText;
-		public float accelerometerUpdateInterval = 1.0f / 60.0f;
-		public float lowPassKernelWidthInSeconds = 1.0f;
-		public float shakeDetectionThreshold = 2.0f;
-		static float lowPassFilterFactor;
-		Vector3 acceleration;
-		Vector2 moveInput;
+		// public float accelerometerUpdateInterval = 1.0f / 60.0f;
+		// public float lowPassKernelWidthInSeconds = 1.0f;
+		// public float shakeDetectionThreshold = 2.0f;
+		// static float lowPassFilterFactor;
+		// Vector3 acceleration;
+		// Vector2 moveInput;
 
 		public override void Awake ()
 		{
@@ -246,7 +245,8 @@ namespace SpaceMayhem
 				// GetSingleton<GameCamera>().DoUpdate ();
 				// acceleration = InputManager.Acceleration;
 				// lowPassValue = Vector3.Lerp(lowPassValue, acceleration, lowPassFilterFactor);
-				if (((acceleration - lowPassValue).sqrMagnitude >= shakeDetectionThreshold || Input.GetKeyDown(KeyCode.Escape)) && !paused)
+				// if (((acceleration - lowPassValue).sqrMagnitude >= shakeDetectionThreshold || Input.GetKeyDown(KeyCode.Escape)) && !paused)
+				if (Input.GetKeyDown(KeyCode.Escape) && !paused)
 					GetSingleton<PauseMenu>().Open ();
 				framesSinceLoadedScene ++;
 				previousMousePosition = InputManager.MousePosition;
