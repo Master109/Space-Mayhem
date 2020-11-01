@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using SpaceMayhem;
 
 public class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour

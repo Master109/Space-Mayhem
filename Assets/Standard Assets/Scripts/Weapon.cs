@@ -1,11 +1,9 @@
-using UnityEngine;
-using System.Collections;
 using Extensions;
-using UnityEngine.Serialization;
+using UnityEngine;
 
 namespace SpaceMayhem
 {
-	public class Weapon : MonoBehaviour, IUpdatable
+	public class Weapon : ShipPart, IUpdatable
 	{
 		public bool PauseWhileUnfocused
 		{
@@ -14,7 +12,6 @@ namespace SpaceMayhem
 				return true;
 			}
 		}
-		public Transform trs;
 		public float shootRate;
 		public float shootTimer;
 		public bool aim;

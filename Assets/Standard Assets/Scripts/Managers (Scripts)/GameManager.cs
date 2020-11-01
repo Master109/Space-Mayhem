@@ -6,13 +6,10 @@ using Extensions;
 using Object = UnityEngine.Object;
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEditor.SceneManagement;
 #endif
 using System.Collections;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using UnityEngine.Tilemaps;
-using TMPro;
 
 namespace SpaceMayhem
 {
@@ -194,7 +191,7 @@ namespace SpaceMayhem
 				return;
 			if (GetSingleton<Player>() == null)
 			{
-				LevelSerializer.LoadObjectTreeFromFile("Player");
+				// LevelSerializer.LoadObjectTreeFromFile("Player");
 				GetSingleton<Player>().enabled = false;
 			}
 			else

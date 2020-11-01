@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using Extensions;
 using TMPro;
+using System;
+using Random = UnityEngine.Random;
 
 namespace SpaceMayhem
 {
-	public class Hangar : MonoBehaviour, IUpdatable
+	public class Hangar : SaveAndLoadObject, IUpdatable
 	{
 		public bool PauseWhileUnfocused
 		{
@@ -33,6 +33,9 @@ namespace SpaceMayhem
 		bool previousLeftClickInput;
 		bool previousRightClickInput;
 		public ParticleSystem thrusterParitcleSystem;
+		[SaveAndLoadValue(false)]
+		public PlayerEntry[] playerEntries = new PlayerEntry[0];
+		public ShipPart[] shipPartPrefabs = new ShipPart[0];
 
 		void Start ()
 		{
@@ -193,7 +196,8 @@ namespace SpaceMayhem
 			GameManager.GetSingleton<Player>().weapons = GameManager.GetSingleton<Player>().GetComponentsInChildren<Weapon>();
 			hitboxTrs.SetParent(GameManager.GetSingleton<Player>().trs);
 			GameManager.HasShip = true;
-			LevelSerializer.SaveObjectTreeToFile("Player", GameManager.GetSingleton<Player>().gameObject);
+			// LevelSerializer.SaveObjectTreeToFile("Player", GameManager.GetSingleton<Player>().gameObject);
+
 			GameManager.GetSingleton<GameManager>().LoadScene ("Level Map");
 		}
 
@@ -259,6 +263,113 @@ namespace SpaceMayhem
 				pointsToCheck.Add(point + new Vector2(-distanceBetweenChecks, -distanceBetweenChecks));
 			if (!checkedPoints.Contains(point + new Vector2(-distanceBetweenChecks, distanceBetweenChecks)) && !pointsToCheck.Contains(point + new Vector2(-distanceBetweenChecks, distanceBetweenChecks)))
 				pointsToCheck.Add(point + new Vector2(-distanceBetweenChecks, distanceBetweenChecks));
+		}
+
+		public struct PlayerEntry
+		{
+			public ShipPartEntry[] shipPartEntries;
+			public const string NAME_AND_VALUE_SEPERATOR = ":";
+			public const string COLLECTION_ELEMENT_SEPERATOR = ",";
+			public const string NAME_AND_VALUE_PAIR_SEPERATOR = ";";
+
+			public PlayerEntry (ShipPartEntry[] shipPartEntries)
+			{
+				this.shipPartEntries = shipPartEntries;
+			}
+
+			public override string ToString ()
+			{
+				string output = "";
+				for (int i = 0; i < shipPartEntries.Length; i ++)
+				{
+					ShipPartEntry shipPartEntry = shipPartEntries[i];
+					output += shipPartEntry + COLLECTION_ELEMENT_SEPERATOR;
+				}
+				return output;
+			}
+
+			public static PlayerEntry FromString (string data)
+			{
+				string[] nameAndValuePairs = data.Split(new string[1] { NAME_AND_VALUE_PAIR_SEPERATOR }, StringSplitOptions.None);
+				string[] shipPartEntriesStrings = ExtractValue(nameAndValuePairs[0]).Split(new string [1] { COLLECTION_ELEMENT_SEPERATOR }, StringSplitOptions.RemoveEmptyEntries);
+                List<ShipPartEntry> shipPartEntries = new List<ShipPartEntry>();
+                for (int i = 0; i < shipPartEntriesStrings.Length; i ++)
+                {
+                    string shipPartEntryString = shipPartEntriesStrings[i];
+                    shipPartEntries.Add(ShipPartEntry.FromString(shipPartEntryString));
+                }
+                return new PlayerEntry(shipPartEntries.ToArray());
+			}
+
+			static string ExtractValue (string nameAndValuePair)
+			{
+				return nameAndValuePair.Substring(nameAndValuePair.IndexOf(NAME_AND_VALUE_SEPERATOR) + NAME_AND_VALUE_SEPERATOR.Length);
+			}
+
+			public Player MakeInstance ()
+			{
+				Player player = (Player) GameManager.Clone(GameManager.GetSingleton<Hangar>().playerPrefab);
+				for (int i = 0; i < shipPartEntries.Length; i ++)
+				{
+					ShipPartEntry shipPartEntry = shipPartEntries[i];
+					ShipPart shipPart = shipPartEntry.MakeInstance ();
+					shipPart.trs.SetParent(player.trs);
+				}
+				return player;
+			}
+			
+			public struct ShipPartEntry
+			{
+				public int partIndex;
+				public Vector2 position;
+				public float rotation;
+				public int sortingOrder;
+				public const string NAME_AND_VALUE_SEPERATOR = ":";
+				public const string NAME_AND_VALUE_PAIR_SEPERATOR = ";";
+
+				public ShipPartEntry (int partIndex, Vector2 position, float rotation, int sortingOrder)
+				{
+					this.partIndex = partIndex;
+					this.position = position;
+					this.rotation = rotation;
+					this.sortingOrder = sortingOrder;
+				}
+
+				public override string ToString ()
+				{
+					return nameof(partIndex) + NAME_AND_VALUE_SEPERATOR + partIndex + NAME_AND_VALUE_PAIR_SEPERATOR + 
+						nameof(position.x) + NAME_AND_VALUE_SEPERATOR + position.x + NAME_AND_VALUE_PAIR_SEPERATOR + 
+						nameof(position.y) + NAME_AND_VALUE_SEPERATOR + position.y + NAME_AND_VALUE_PAIR_SEPERATOR + 
+						nameof(rotation) + NAME_AND_VALUE_SEPERATOR + rotation + NAME_AND_VALUE_PAIR_SEPERATOR + 
+						nameof(sortingOrder) + NAME_AND_VALUE_SEPERATOR + sortingOrder + NAME_AND_VALUE_PAIR_SEPERATOR;
+				}
+
+				public static ShipPartEntry FromString (string data)
+				{
+					string[] nameAndValuePairs = data.Split(new string[1] { NAME_AND_VALUE_PAIR_SEPERATOR }, StringSplitOptions.None);
+					int partIndex = int.Parse(ExtractValue(nameAndValuePairs[0]));
+					float positionX = float.Parse(ExtractValue(nameAndValuePairs[1]));
+					float positionY = float.Parse(ExtractValue(nameAndValuePairs[2]));
+					float rotation = float.Parse(ExtractValue(nameAndValuePairs[3]));
+					int sortingOrder = int.Parse(ExtractValue(nameAndValuePairs[4]));
+					Vector2 position = new Vector2(positionX, positionY);
+					return new ShipPartEntry(partIndex, position, rotation, sortingOrder);
+				}
+
+				static string ExtractValue (string nameAndValuePair)
+				{
+					return nameAndValuePair.Substring(nameAndValuePair.IndexOf(NAME_AND_VALUE_SEPERATOR) + NAME_AND_VALUE_SEPERATOR.Length);
+				}
+
+				public ShipPart MakeInstance ()
+				{
+					ShipPart shipPart = (ShipPart) GameManager.Clone(GameManager.GetSingleton<Hangar>().shipPartPrefabs[partIndex]);
+					shipPart.trs.position = position;
+					shipPart.trs.eulerAngles = Vector3.forward * rotation;
+					shipPart.spriteRenderer.sortingOrder = sortingOrder;
+					return shipPart;
+				}
+			}
 		}
 	}
 }

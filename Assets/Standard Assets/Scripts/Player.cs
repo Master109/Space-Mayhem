@@ -1,13 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Extensions;
+using Sirenix.Serialization;
+using Utf8Json;
 
 namespace SpaceMayhem
 {
 	[DisallowMultipleComponent]
-	public class Player : Ship
+	public class Player : Ship, ISaveableAndLoadable
 	{
+		public int uniqueId;
+		public int UniqueId
+		{
+			get
+			{
+				return uniqueId;
+			}
+			set
+			{
+				uniqueId = value;
+			}
+		}
 		public static Player instance;
 		public static float score;
 		public const int INIT_GOLD = 1000;
@@ -63,7 +78,7 @@ namespace SpaceMayhem
 			}
 		}
 
-		void OnSceneLoaded (Scene scene = new Scene(), LoadSceneMode loadMod = LoadSceneMode.Single)
+		void OnSceneLoaded (Scene scene = new Scene(), LoadSceneMode loadMode = LoadSceneMode.Single)
 		{
 			if (GameManager.GetSingleton<Level>() != null)
 			{
