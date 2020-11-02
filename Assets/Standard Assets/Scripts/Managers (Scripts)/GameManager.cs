@@ -192,7 +192,7 @@ namespace SpaceMayhem
 			if (GetSingleton<Player>() == null)
 			{
 				// LevelSerializer.LoadObjectTreeFromFile("Player");
-				GetSingleton<Player>().enabled = false;
+				// GetSingleton<Player>().enabled = false;
 			}
 			else
 				GetSingleton<Player>().gameObject.SetActive(true);

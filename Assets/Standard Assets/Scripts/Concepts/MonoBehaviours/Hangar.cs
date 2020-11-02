@@ -306,6 +306,11 @@ namespace SpaceMayhem
 				return nameAndValuePair.Substring(nameAndValuePair.IndexOf(NAME_AND_VALUE_SEPERATOR) + NAME_AND_VALUE_SEPERATOR.Length);
 			}
 
+			public static PlayerEntry FromInstance (Player player)
+			{
+				return new PlayerEntry();
+			}
+
 			public Player MakeInstance ()
 			{
 				Player player = (Player) GameManager.Clone(GameManager.GetSingleton<Hangar>().playerPrefab);
@@ -359,6 +364,21 @@ namespace SpaceMayhem
 				static string ExtractValue (string nameAndValuePair)
 				{
 					return nameAndValuePair.Substring(nameAndValuePair.IndexOf(NAME_AND_VALUE_SEPERATOR) + NAME_AND_VALUE_SEPERATOR.Length);
+				}
+
+				public static ShipPartEntry FromInstance (ShipPart shipPart)
+				{
+					int partIndex = MathfExtensions.NULL_INT;
+					for (int i = 0; i < GameManager.GetSingleton<Hangar>().shipPartPrefabs.Length; i ++)
+					{
+						ShipPart shipPartPrefab = GameManager.GetSingleton<Hangar>().shipPartPrefabs[i];
+						if (shipPartPrefab.name == shipPart.name.Replace("(Clone)", ""))
+						{
+							partIndex = i;
+							break;
+						}
+					}
+					return new ShipPartEntry(partIndex, shipPart.trs.position, shipPart.trs.eulerAngles.z, shipPart.spriteRenderer.sortingOrder);
 				}
 
 				public ShipPart MakeInstance ()
