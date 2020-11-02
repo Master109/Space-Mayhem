@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace SpaceMayhem
 {
-	public class Hangar : SaveAndLoadObject, IUpdatable
+	public class Hangar : SaveAndLoadObject, IUpdatable, ISaveableAndLoadable
 	{
 		public bool PauseWhileUnfocused
 		{
@@ -33,13 +33,11 @@ namespace SpaceMayhem
 		bool previousLeftClickInput;
 		bool previousRightClickInput;
 		public ParticleSystem thrusterParitcleSystem;
-		[SaveAndLoadValue(false)]
-		public PlayerEntry[] playerEntries = new PlayerEntry[0];
 		public ShipPart[] shipPartPrefabs = new ShipPart[0];
 
 		void Start ()
 		{
-			moneyText.text = "$" + Player.gold;
+			moneyText.text = "$" + Player.Gold;
 			GameObject hitboxGo = GameObject.Find("Hitbox(Clone)");
 			if (hitboxGo != null)
 				Destroy(hitboxGo);
@@ -127,8 +125,8 @@ namespace SpaceMayhem
 					ShipPart.selected.transform.localScale = new Vector2(ShipPart.selected.transform.localScale.x, ShipPart.selected.transform.localScale.y * -1);
 				else if (Input.GetKeyDown(KeyCode.S))
 				{
-					Player.gold += ShipPart.selected.cost / 1;
-					moneyText.text = "$" + Player.gold;
+					Player.Gold += ShipPart.selected.cost / 1;
+					moneyText.text = "$" + Player.Gold;
 					Destroy(ShipPart.selected.gameObject);
 				}
 			}
@@ -138,10 +136,10 @@ namespace SpaceMayhem
 
 		public void BuyPart (ShipPart part)
 		{
-			if (Player.gold >= part.cost)
+			if (Player.Gold >= part.cost)
 			{
-				Player.gold -= part.cost;
-				moneyText.text = "$" + Player.gold;
+				Player.Gold -= part.cost;
+				moneyText.text = "$" + Player.Gold;
 				ShipPart sp = (ShipPart) Instantiate(part);
 				sp.gameObject.SetActive(true);
 			}
@@ -197,7 +195,8 @@ namespace SpaceMayhem
 			hitboxTrs.SetParent(GameManager.GetSingleton<Player>().trs);
 			GameManager.HasShip = true;
 			// LevelSerializer.SaveObjectTreeToFile("Player", GameManager.GetSingleton<Player>().gameObject);
-
+			GameManager.playerEntries = new GameManager.PlayerEntry[1];
+			GameManager.playerEntries[0] = GameManager.PlayerEntry.FromInstance(GameManager.GetSingleton<Player>());
 			GameManager.GetSingleton<GameManager>().LoadScene ("Level Map");
 		}
 
@@ -263,133 +262,6 @@ namespace SpaceMayhem
 				pointsToCheck.Add(point + new Vector2(-distanceBetweenChecks, -distanceBetweenChecks));
 			if (!checkedPoints.Contains(point + new Vector2(-distanceBetweenChecks, distanceBetweenChecks)) && !pointsToCheck.Contains(point + new Vector2(-distanceBetweenChecks, distanceBetweenChecks)))
 				pointsToCheck.Add(point + new Vector2(-distanceBetweenChecks, distanceBetweenChecks));
-		}
-
-		public struct PlayerEntry
-		{
-			public ShipPartEntry[] shipPartEntries;
-			public const string NAME_AND_VALUE_SEPERATOR = ":";
-			public const string COLLECTION_ELEMENT_SEPERATOR = ",";
-			public const string NAME_AND_VALUE_PAIR_SEPERATOR = ";";
-
-			public PlayerEntry (ShipPartEntry[] shipPartEntries)
-			{
-				this.shipPartEntries = shipPartEntries;
-			}
-
-			public override string ToString ()
-			{
-				string output = "";
-				for (int i = 0; i < shipPartEntries.Length; i ++)
-				{
-					ShipPartEntry shipPartEntry = shipPartEntries[i];
-					output += shipPartEntry + COLLECTION_ELEMENT_SEPERATOR;
-				}
-				return output;
-			}
-
-			public static PlayerEntry FromString (string data)
-			{
-				string[] nameAndValuePairs = data.Split(new string[1] { NAME_AND_VALUE_PAIR_SEPERATOR }, StringSplitOptions.None);
-				string[] shipPartEntriesStrings = ExtractValue(nameAndValuePairs[0]).Split(new string [1] { COLLECTION_ELEMENT_SEPERATOR }, StringSplitOptions.RemoveEmptyEntries);
-                List<ShipPartEntry> shipPartEntries = new List<ShipPartEntry>();
-                for (int i = 0; i < shipPartEntriesStrings.Length; i ++)
-                {
-                    string shipPartEntryString = shipPartEntriesStrings[i];
-                    shipPartEntries.Add(ShipPartEntry.FromString(shipPartEntryString));
-                }
-                return new PlayerEntry(shipPartEntries.ToArray());
-			}
-
-			static string ExtractValue (string nameAndValuePair)
-			{
-				return nameAndValuePair.Substring(nameAndValuePair.IndexOf(NAME_AND_VALUE_SEPERATOR) + NAME_AND_VALUE_SEPERATOR.Length);
-			}
-
-			public static PlayerEntry FromInstance (Player player)
-			{
-				return new PlayerEntry();
-			}
-
-			public Player MakeInstance ()
-			{
-				Player player = (Player) GameManager.Clone(GameManager.GetSingleton<Hangar>().playerPrefab);
-				for (int i = 0; i < shipPartEntries.Length; i ++)
-				{
-					ShipPartEntry shipPartEntry = shipPartEntries[i];
-					ShipPart shipPart = shipPartEntry.MakeInstance ();
-					shipPart.trs.SetParent(player.trs);
-				}
-				return player;
-			}
-			
-			public struct ShipPartEntry
-			{
-				public int partIndex;
-				public Vector2 position;
-				public float rotation;
-				public int sortingOrder;
-				public const string NAME_AND_VALUE_SEPERATOR = ":";
-				public const string NAME_AND_VALUE_PAIR_SEPERATOR = ";";
-
-				public ShipPartEntry (int partIndex, Vector2 position, float rotation, int sortingOrder)
-				{
-					this.partIndex = partIndex;
-					this.position = position;
-					this.rotation = rotation;
-					this.sortingOrder = sortingOrder;
-				}
-
-				public override string ToString ()
-				{
-					return nameof(partIndex) + NAME_AND_VALUE_SEPERATOR + partIndex + NAME_AND_VALUE_PAIR_SEPERATOR + 
-						nameof(position.x) + NAME_AND_VALUE_SEPERATOR + position.x + NAME_AND_VALUE_PAIR_SEPERATOR + 
-						nameof(position.y) + NAME_AND_VALUE_SEPERATOR + position.y + NAME_AND_VALUE_PAIR_SEPERATOR + 
-						nameof(rotation) + NAME_AND_VALUE_SEPERATOR + rotation + NAME_AND_VALUE_PAIR_SEPERATOR + 
-						nameof(sortingOrder) + NAME_AND_VALUE_SEPERATOR + sortingOrder + NAME_AND_VALUE_PAIR_SEPERATOR;
-				}
-
-				public static ShipPartEntry FromString (string data)
-				{
-					string[] nameAndValuePairs = data.Split(new string[1] { NAME_AND_VALUE_PAIR_SEPERATOR }, StringSplitOptions.None);
-					int partIndex = int.Parse(ExtractValue(nameAndValuePairs[0]));
-					float positionX = float.Parse(ExtractValue(nameAndValuePairs[1]));
-					float positionY = float.Parse(ExtractValue(nameAndValuePairs[2]));
-					float rotation = float.Parse(ExtractValue(nameAndValuePairs[3]));
-					int sortingOrder = int.Parse(ExtractValue(nameAndValuePairs[4]));
-					Vector2 position = new Vector2(positionX, positionY);
-					return new ShipPartEntry(partIndex, position, rotation, sortingOrder);
-				}
-
-				static string ExtractValue (string nameAndValuePair)
-				{
-					return nameAndValuePair.Substring(nameAndValuePair.IndexOf(NAME_AND_VALUE_SEPERATOR) + NAME_AND_VALUE_SEPERATOR.Length);
-				}
-
-				public static ShipPartEntry FromInstance (ShipPart shipPart)
-				{
-					int partIndex = MathfExtensions.NULL_INT;
-					for (int i = 0; i < GameManager.GetSingleton<Hangar>().shipPartPrefabs.Length; i ++)
-					{
-						ShipPart shipPartPrefab = GameManager.GetSingleton<Hangar>().shipPartPrefabs[i];
-						if (shipPartPrefab.name == shipPart.name.Replace("(Clone)", ""))
-						{
-							partIndex = i;
-							break;
-						}
-					}
-					return new ShipPartEntry(partIndex, shipPart.trs.position, shipPart.trs.eulerAngles.z, shipPart.spriteRenderer.sortingOrder);
-				}
-
-				public ShipPart MakeInstance ()
-				{
-					ShipPart shipPart = (ShipPart) GameManager.Clone(GameManager.GetSingleton<Hangar>().shipPartPrefabs[partIndex]);
-					shipPart.trs.position = position;
-					shipPart.trs.eulerAngles = Vector3.forward * rotation;
-					shipPart.spriteRenderer.sortingOrder = sortingOrder;
-					return shipPart;
-				}
-			}
 		}
 	}
 }

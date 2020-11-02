@@ -26,7 +26,19 @@ namespace SpaceMayhem
 		public static Player instance;
 		public static float score;
 		public const int INIT_GOLD = 1000;
-		public static int gold = INIT_GOLD;
+		// [SaveAndLoadValue(false)]
+		// public static int gold = INIT_GOLD;
+		public static int Gold
+		{
+			get
+			{
+				return PlayerPrefs.GetInt("Gold", INIT_GOLD);
+			}
+			set
+			{
+				PlayerPrefs.SetInt("Gold", value);
+			}
+		}
 		public float grazeHeal;
 		public float grazeToScore;
 		public ShipPart[] shipParts = new ShipPart[0];

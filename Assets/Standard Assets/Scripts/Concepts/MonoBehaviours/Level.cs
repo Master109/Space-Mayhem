@@ -78,7 +78,7 @@ namespace SpaceMayhem
 		{
 			if (Player.score > Score)
 			{
-				Player.gold += (int) Player.score - Score;
+				Player.Gold += (int) Player.score - Score;
 				Score = (int) Player.score;
 				IsComplete = true;
 			}

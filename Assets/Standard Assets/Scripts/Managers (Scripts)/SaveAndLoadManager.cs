@@ -191,6 +191,10 @@ namespace SpaceMayhem
 					File.CreateText(Application.persistentDataPath + Path.DirectorySeparatorChar + "Saved Data.txt");
 			}
 			StartCoroutine(LoadRoutine (accountIndex));
+			// if (accountIndex != -1)
+			// 	Load (accountIndex, ArchivesManager.CurrentlyPlaying.MostRecentlyUsedSaveIndex);
+			// else
+			// 	Load (-1, -1);
 		}
 
 		IEnumerator LoadRoutine (int accountIndex)
@@ -199,7 +203,6 @@ namespace SpaceMayhem
 				yield return StartCoroutine(LoadRoutine (accountIndex, ArchivesManager.CurrentlyPlaying.MostRecentlyUsedSaveIndex));
 			else
 				yield return StartCoroutine(LoadRoutine (-1, -1));
-
 		}
 
 		IEnumerator LoadRoutine (int accountIndex, int saveIndex)
@@ -210,6 +213,14 @@ namespace SpaceMayhem
 				saveEntries[i].Load (accountIndex, saveIndex);
 			OnLoaded ();
 		}
+
+		// void Load (int accountIndex, int saveIndex)
+		// {
+		// 	Setup ();
+		// 	for (int i = 0; i < saveEntries.Length; i ++)
+		// 		saveEntries[i].Load (accountIndex, saveIndex);
+		// 	OnLoaded ();
+		// }
 
 		public virtual void OnLoaded ()
 		{

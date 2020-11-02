@@ -69,13 +69,14 @@ namespace SpaceMayhem
 		public Scrollbar accountInfoScrollbar;
 		// public static MenuOption player1AccountAssigner;
 		// public static MenuOption player2AccountAssigner;
-		public Transform trs;
+		// public Transform trs;
 		public static Account[] Accounts
 		{
 			get
 			{
 				List<Account> output = new List<Account>();
 				output.Add(ArchivesManager.Instance.newAccount);
+				// output.Add(new Account());
 				// foreach (AccountSelectMenuOption accountSelectMenuOption in GameManager.GetSingleton<AccountSelectMenu>().menuOptions)
 					// output.Add(accountSelectMenuOption.account);
 				return output.ToArray();
@@ -113,7 +114,7 @@ namespace SpaceMayhem
 				return;
 			}
 			base.Awake ();
-			trs.SetParent(null);
+			// trs.SetParent(null);
 			// if (BuildManager.IsFirstStartup)
 			// {
 			// 	if (GameManager.GetSingleton<BuildManager>().clearDataOnFirstStartup)
