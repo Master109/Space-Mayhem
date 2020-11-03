@@ -137,7 +137,7 @@ namespace SpaceMayhem
 
 		public virtual T SpawnComponent<T> (T component, Vector3 position = new Vector3(), Quaternion rotation = new Quaternion(), Transform parent = null) where T : Object
 		{
-			return (T) Instantiate(component, position, rotation, parent);
+			return Instantiate(component, position, rotation, parent);
 		}
 		
 		public virtual T Spawn<T> (T prefab, Vector3 position = new Vector3(), Quaternion rotation = new Quaternion(), Transform parent = null)

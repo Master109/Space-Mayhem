@@ -59,7 +59,7 @@ namespace SpaceMayhem
 				if (muzzleFlash != null)
 					GameManager.GetSingleton<ObjectPool>().SpawnComponent<Spawnable>(muzzleFlash.prefabIndex, muzzleFlashTrs.position, muzzleFlashTrs.rotation);
 				Bullet bullet = GameManager.GetSingleton<ObjectPool>().SpawnComponent<Bullet>(bulletPrefab.prefabIndex, shootSpawnTrs.position, shootSpawnTrs.rotation);
-				shootTimer = 0;
+				shootTimer -= shootRate;
 				if (shootSound != null)
 					AudioManager.PlaySoundEffect (GameManager.GetSingleton<AudioManager>().soundEffectPrefab, new SoundEffect.Settings(shootSound), trs.position, trs.rotation, trs);
 			}
