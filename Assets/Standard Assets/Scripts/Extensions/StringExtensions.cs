@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Extensions
+﻿namespace Extensions
 {
 	public static class StringExtensions
 	{
@@ -47,11 +43,35 @@ namespace Extensions
 			int indexOfStartString = str.IndexOf(startString);
 			if (indexOfStartString != -1)
 			{
-				string startOfStr = str.Substring(0, indexOfStartString);
+				string strStart = str.Substring(0, indexOfStartString);
 				str = str.Substring(indexOfStartString + startString.Length);
-				output = startOfStr + str.RemoveStartEnd(0, str.IndexOf(endString) + endString.Length);
+				output = strStart + str.RemoveStartEnd(0, str.IndexOf(endString) + endString.Length);
 			}
 			return output;
+		}
+		
+		public static string ReplaceFirst (this string str, string replace, string replaceWith)
+		{
+			int indexOfReplace = str.IndexOf(replace);
+			if (indexOfReplace != -1)
+			{
+				string strStart = str.Substring(0, indexOfReplace);
+				string strEnd = str.Substring(indexOfReplace + replace.Length);
+				return strStart + replaceWith + strEnd;
+			}
+			return str;
+		}
+		
+		public static string ReplaceLast (this string str, string replace, string replaceWith)
+		{
+			int indexOfReplace = str.LastIndexOf(replace);
+			if (indexOfReplace != -1)
+			{
+				string strStart = str.Substring(0, indexOfReplace);
+				string strEnd = str.Substring(indexOfReplace + replace.Length);
+				return strStart + replaceWith + strEnd;
+			}
+			return str;
 		}
 	}
 }

@@ -8,7 +8,7 @@ namespace SpaceMayhem
 	{
 		public Level level;
 		public Button button;
-		public Tooltip tooltip;
+		public Text text;
 
 		public void PlayLevel ()
 		{

@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+using Extensions;
 
 namespace SpaceMayhem
 {
 	public class LevelMap : MonoBehaviour
 	{
 		public LevelButton[] levelButtons = new LevelButton[0];
+		public const string REPLACE_INDICATOR = "_";
 		
 		void Start ()
 		{
@@ -16,9 +16,14 @@ namespace SpaceMayhem
 			{
 				LevelButton levelButton = levelButtons[i];
 				if (levelButton.level.IsComplete)
-					levelButton.tooltip.text.text = "Best score: " + levelButton.level.Score;
+					levelButton.text.text = levelButton.text.text.ReplaceFirst(REPLACE_INDICATOR, "" + levelButton.level.Score);
 				else
-					levelButton.tooltip.text.text = "Best score: Need to complete level";
+				{
+					if (levelButton.level is Survival)
+						levelButton.text.text = levelButton.text.text.ReplaceFirst(REPLACE_INDICATOR, "Not attempted");
+					else
+						levelButton.text.text = levelButton.text.text.ReplaceFirst(REPLACE_INDICATOR, "Not completed");
+				}
 				if (i > 0 && previousLevelButton.level.IsComplete)
 					levelButton.button.interactable = true;
 				previousLevelButton = levelButton;

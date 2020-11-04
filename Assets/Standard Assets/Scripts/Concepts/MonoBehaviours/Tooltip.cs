@@ -24,6 +24,7 @@ public class Tooltip : MonoBehaviour, IUpdatable
 			return;
 #endif
 		rectTrs.SetParent(canvasRectTrs);
+		rectTrs.localScale = Vector3.one;
 	}
 
 	void OnEnable ()
