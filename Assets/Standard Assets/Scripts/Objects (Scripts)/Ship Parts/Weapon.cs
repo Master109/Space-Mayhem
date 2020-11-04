@@ -33,13 +33,15 @@ namespace SpaceMayhem
 		{
 			// if (Random.value > .5f)
 			// 	shootAnglesChangesMultiplier *= -1;
+			shootTimer = shootRate;
 			GameManager.updatables = GameManager.updatables.Add(this);
 		}
 
 		public void DoUpdate ()
 		{
 			toPlayer = GameManager.GetSingleton<Player>().trs.position - trs.position;
-			shootTimer += Time.deltaTime;
+			if (shootTimer < shootRate)
+				shootTimer += Time.deltaTime;
 			if (shootAngle <= shootAngleRange.min || shootAngle >= shootAngleRange.max)
 				shootAnglesChangesMultiplier *= -1;
 			shootAngle += shootAnglesChange * shootAnglesChangesMultiplier * Time.deltaTime;
@@ -54,7 +56,7 @@ namespace SpaceMayhem
 
 		public void Shoot ()
 		{
-			if (shootTimer > shootRate)
+			if (shootTimer >= shootRate)
 			{
 				if (muzzleFlash != null)
 					GameManager.GetSingleton<ObjectPool>().SpawnComponent<Spawnable>(muzzleFlash.prefabIndex, muzzleFlashTrs.position, muzzleFlashTrs.rotation);
