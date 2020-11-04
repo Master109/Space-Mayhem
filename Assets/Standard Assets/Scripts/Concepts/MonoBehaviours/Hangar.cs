@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using Extensions;
 using TMPro;
-using System;
-using Random = UnityEngine.Random;
 
 namespace SpaceMayhem
 {
@@ -265,6 +263,7 @@ namespace SpaceMayhem
 
 		void OnApplicationQuit ()
 		{
+			SetHitbox ();
 			MakeShip ();
 		}
 	}

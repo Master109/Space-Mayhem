@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Extensions;
 using SpaceMayhem;
-using UnityEngine.UI;
 using TMPro;
 
 [ExecuteInEditMode]
