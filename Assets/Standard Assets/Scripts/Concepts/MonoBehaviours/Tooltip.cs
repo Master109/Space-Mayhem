@@ -46,7 +46,7 @@ public class Tooltip : MonoBehaviour, IUpdatable
 
 	public void DoUpdate ()
 	{
-		rectTrs.anchoredPosition = InputManager.MousePosition;
+		rectTrs.position = InputManager.MousePosition;
 	}
 
 	void OnDisable ()

@@ -164,7 +164,7 @@ namespace SpaceMayhem
 				return;
 			}
 			SetHitbox ();
-			bool hasGaps = CheckForGaps ();
+			bool hasGaps = CheckForGaps();
 			if (hasGaps)
 			{
 				noThrusterText.Stop ();
@@ -172,6 +172,7 @@ namespace SpaceMayhem
 				return;
 			}
 			MakeShip ();
+			GameManager.GetSingleton<GameManager>().LoadScene ("Level Map");
 		}
 
 		void MakeShip ()
@@ -194,10 +195,8 @@ namespace SpaceMayhem
 			GameManager.GetSingleton<Player>().weapons = GameManager.GetSingleton<Player>().GetComponentsInChildren<Weapon>();
 			hitboxTrs.SetParent(GameManager.GetSingleton<Player>().trs);
 			GameManager.HasShip = true;
-			// LevelSerializer.SaveObjectTreeToFile("Player", GameManager.GetSingleton<Player>().gameObject);
 			GameManager.playerEntries = new GameManager.PlayerEntry[1];
 			GameManager.playerEntries[0] = GameManager.PlayerEntry.FromInstance(GameManager.GetSingleton<Player>());
-			GameManager.GetSingleton<GameManager>().LoadScene ("Level Map");
 		}
 
 		void SetHitbox ()
@@ -262,6 +261,11 @@ namespace SpaceMayhem
 				pointsToCheck.Add(point + new Vector2(-distanceBetweenChecks, -distanceBetweenChecks));
 			if (!checkedPoints.Contains(point + new Vector2(-distanceBetweenChecks, distanceBetweenChecks)) && !pointsToCheck.Contains(point + new Vector2(-distanceBetweenChecks, distanceBetweenChecks)))
 				pointsToCheck.Add(point + new Vector2(-distanceBetweenChecks, distanceBetweenChecks));
+		}
+
+		void OnApplicationQuit ()
+		{
+			MakeShip ();
 		}
 	}
 }
