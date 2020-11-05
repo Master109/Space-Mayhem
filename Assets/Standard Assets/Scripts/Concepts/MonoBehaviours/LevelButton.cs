@@ -25,6 +25,12 @@ namespace SpaceMayhem
 			GameManager.GetSingleton<Player>().trs.position = GameManager.GetSingleton<Level>().playerSpawnPoint.position;
 			GameManager.GetSingleton<Player>().gameObject.SetActive(true);
 			GameManager.GetSingleton<Player>().enabled = true;
+			for (int i = 0; i < GameManager.GetSingleton<Player>().weapons.Length; i ++)
+			{
+				Weapon weapon = GameManager.GetSingleton<Player>().weapons[i];
+				weapon.shootAngle = weapon.trs.eulerAngles.z;
+				weapon.enabled = true;
+			}
 		}
 	}
 }

@@ -1,15 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Extensions;
-using Sirenix.Serialization;
-using Utf8Json;
 
 namespace SpaceMayhem
 {
 	[DisallowMultipleComponent]
-	public class Player : Ship, ISaveableAndLoadable
+	public class Player : Ship//, ISaveableAndLoadable
 	{
 		public int uniqueId;
 		public int UniqueId
@@ -85,8 +82,11 @@ namespace SpaceMayhem
 			rigid.velocity = velocity;
 			if (Input.GetButton("Fire"))
 			{
-				foreach (Weapon w in weapons)
-					w.Shoot();
+				foreach (Weapon weapon in weapons)
+				{
+					weapon.enabled = true;
+					weapon.Shoot();
+				}
 			}
 		}
 

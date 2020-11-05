@@ -17,8 +17,6 @@ namespace SpaceMayhem
 		public bool aim;
 		public float shootAngle;
 		public float shootAnglesChange;
-		// public float shootAnglesMin;
-		// public float shootAnglesMax;
 		public FloatRange shootAngleRange;
 		public Transform shootSpawnTrs;
 		public Bullet bulletPrefab;
